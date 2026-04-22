@@ -1,0 +1,283 @@
+CLASSE: Pokemon.java
+public class Pokemon {
+
+    private String nome;
+    private int hp;
+    private int hpMax;
+    private int attacco;
+    private int difesa;
+    private String tipo;
+
+    private boolean megaEvoluto = false;
+    private boolean superMossaUsata = false;
+
+    public Pokemon(String nome, int hp, int attacco, int difesa, String tipo) {
+        this.nome = nome;
+        this.hp = hp;
+        this.hpMax = hp;
+        this.attacco = attacco;
+        this.difesa = difesa;
+        this.tipo = tipo;
+    }
+
+    public void attacca(Pokemon nemico) {
+        double efficacia = calcolaEfficacia(this.tipo, nemico.tipo);
+        int base = attacco - nemico.difesa;
+        if (base < 1) base = 1;
+
+        int danno = (int) (base * efficacia);
+        if (danno < 1) danno = 1;
+
+        nemico.riceviDanno(danno);
+        System.out.println(nome + " attacca " + nemico.nome + " infliggendo " + danno + " danni.");
+    }
+
+    public void riceviDanno(int danno) {
+        hp -= danno;
+        if (hp < 0) {
+            hp = 0;
+            System.out.println(nome+" E' stato sconfitto!");
+    }
+    }
+
+    public void usaPozione() {
+        hp += 30;
+        if (hp > hpMax) hp = hpMax;
+        System.out.println(nome + " usa una pozione. HP: " + hp);
+    }
+
+    public void usaSuperMossa(Pokemon nemico) {
+        if (superMossaUsata) {
+            System.out.println(nome + " ha già usato la super mossa!");
+            return;
+        }
+
+        int danno = (int) (attacco * 1.8);
+        nemico.riceviDanno(danno);
+        superMossaUsata = true;
+
+        System.out.println(nome + " usa la SUPER MOSSA su " + nemico.nome + "!");
+    }
+
+    public void megaEvoluzione() {
+        if (megaEvoluto) {
+            System.out.println(nome + " è già megaevoluto!");
+            return;
+        }
+
+        attacco += 10;
+        difesa += 10;
+        megaEvoluto = true;
+
+        System.out.println(nome + " si MEGAEVOLVE!");
+    }
+
+    public boolean isKo() {
+        return hp <= 0;
+    }
+
+    public String getNome() { 
+return nome;
+ }
+    public int getHp() { 	
+return hp; 
+}
+
+    public static double calcolaEfficacia(String attaccante, String difensore) {
+        attaccante = attaccante.toLowerCase();
+        difensore = difensore.toLowerCase();
+
+        if (attaccante.equals("fuoco")) {
+            if (difensore.equals("erba") || difensore.equals("ghiaccio")) return 2.0;
+            if (difensore.equals("acqua")) return 0.5;
+        }
+        if (attaccante.equals("acqua")) {
+            if (difensore.equals("fuoco") || difensore.equals("terra")) return 2.0;
+            if (difensore.equals("erba")) return 0.5;
+        }
+        if (attaccante.equals("terra") && difensore.equals("elettrico")) return 2.0;
+        if (attaccante.equals("elettrico") && difensore.equals("terra")) return 0.0;
+        if (attaccante.equals("buio") && difensore.equals("psico")) return 2.0;
+        if (attaccante.equals("psico") && difensore.equals("buio")) return 0.5;
+
+        return 1.0;
+    }
+}
+
+
+
+
+
+
+
+
+Main: Main.java
+import java.util.Random;
+import java.util.Scanner;
+
+public class Main {
+
+    static Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        System.out.println("Benvenuto nell'arena Pokémon!");
+
+        Pokemon[] squadra1 = {
+                new Pokemon("Inceneroar", 100, 150, 90, "Fuoco"),
+                new Pokemon("Lyncarock", 100, 100, 90, "Terra"),
+                new Pokemon("Lunala", 200, 150, 160, "Psico"),
+                new Pokemon("Muk", 150, 100, 100, "Buio"),
+                new Pokemon("Pelipper", 100, 100, 75, "Acqua"),
+                new Pokemon("Ampharos", 100, 100, 100, "Elettrico")
+        };
+
+        Pokemon[] squadra2 = {
+                new Pokemon("Charizard", 150, 150, 100, "Fuoco"),
+                new Pokemon("Gardevoir", 100, 100, 100, "Psico"),
+                new Pokemon("Glaceon", 100, 90, 110, "Ghiaccio"),
+                new Pokemon("Rayquaza", 100, 100, 100, "Drago"),
+                new Pokemon("Zoroark", 100, 100, 100, "Buio"),
+                new Pokemon("Volcarona", 100, 100, 100, "Coleottero")
+        };
+
+        Pokemon attivo1 = squadra1[0];
+        Pokemon attivo2 = squadra2[0];
+
+        int turno = 1;
+
+        while (!tuttiKo(squadra1) && !tuttiKo(squadra2)) {
+            System.out.println("\n===== TURNO " + turno + " =====");
+
+            // TURNO GIOCATORE
+            System.out.println("\nIl tuo Pokémon: " + attivo1.getNome() + " HP: " + attivo1.getHp());
+            attivo1 = turnoUtente(attivo1, squadra1, attivo2);
+
+            if (attivo2.isKo()) {
+                 System.out.println("💥 Hai mandato KO il Pokémon avversario!");
+                 attivo2 = scegliPrimoVivo(squadra2);
+                if (attivo2 != null) {
+                System.out.println("⚔️ L'avversario manda in campo " + attivo2.getNome());
+                }
+            }
+
+
+            // TURNO CPU (semplice random)
+            System.out.println("\nTurno avversario...");
+            azioneCpu(attivo2, attivo1);
+
+            if (attivo1.isKo()) {
+                 System.out.println("😭 Il tuo Pokémon è stato sconfitto!");
+                attivo1 = scegliPokemon(squadra1);
+                System.out.println("✨ Vai, " + attivo1.getNome() + "!");
+            }
+
+            stampaStatoSquadre(squadra1, squadra2);
+            turno++;
+        }
+
+        if (tuttiKo(squadra1)) {
+            System.out.println("\nHA VINTO LA SQUADRA 2!");
+        } else {
+            System.out.println("\nHA VINTO LA SQUADRA 1!");
+        }
+    }
+
+    // ---------------- TURNO UTENTE ----------------
+
+    public static Pokemon turnoUtente(Pokemon attivo, Pokemon[] squadra, Pokemon nemico) {
+        System.out.println("""
+                Scegli azione:
+                1 - Colpire
+                2 - Curare
+                3 - Mega Evolvere
+                4 - Cambiare Pokémon
+                """);
+
+        int scelta = scanner.nextInt();
+
+        switch (scelta) {
+            case 1 -> {
+                System.out.println("1 - Colpo normale");
+                System.out.println("2 - Super mossa");
+                int tipo = scanner.nextInt();
+
+                if (tipo == 1) {
+                    attivo.attacca(nemico);
+                } else if (tipo == 2) {
+                    attivo.usaSuperMossa(nemico);
+                } else {
+                    System.out.println("Scelta non valida.");
+                }
+            }
+
+            case 2 -> attivo.usaPozione();
+
+            case 3 -> attivo.megaEvoluzione();
+
+            case 4 -> attivo = scegliPokemon(squadra);
+
+            default -> System.out.println("Scelta non valida.");
+        }
+
+        return attivo;
+    }
+
+    // ---------------- CPU ----------------
+
+    public static void azioneCpu(Pokemon cpu, Pokemon nemico) {
+        Random random = new Random();
+        int scelta = random.nextInt(3) + 1;
+
+        switch (scelta) {
+            case 1 -> cpu.attacca(nemico);
+            case 2 -> cpu.usaPozione();
+            case 3 -> cpu.megaEvoluzione();
+        }
+    }
+
+    // ---------------- UTIL ----------------
+
+    public static Pokemon scegliPokemon(Pokemon[] squadra) {
+        System.out.println("\nScegli il Pokémon:");
+
+        for (int i = 0; i < squadra.length; i++) {
+            Pokemon p = squadra[i];
+            System.out.println(i + " - " + p.getNome() + " HP: " + p.getHp());
+        }
+
+        int scelta = scanner.nextInt();
+        if (scelta < 0 || scelta >= squadra.length || squadra[scelta].isKo()) {
+            System.out.println("Scelta non valida!");
+            return scegliPokemon(squadra);
+        }
+
+        return squadra[scelta];
+    }
+
+    public static Pokemon scegliPrimoVivo(Pokemon[] squadra) {
+        for (Pokemon p : squadra) {
+            if (!p.isKo()) return p;
+        }
+        return null;
+    }
+
+    public static boolean tuttiKo(Pokemon[] squadra) {
+        for (Pokemon p : squadra) {
+            if (!p.isKo()) return false;
+        }
+        return true;
+    }
+
+    public static void stampaStatoSquadre(Pokemon[] squadra1, Pokemon[] squadra2) {
+        System.out.println("\n--- Stato Squadra 1 ---");
+        for (Pokemon p : squadra1) {
+            System.out.println(p.getNome() + " HP: " + p.getHp());
+        }
+
+        System.out.println("\n--- Stato Squadra 2 ---");
+        for (Pokemon p : squadra2) {
+            System.out.println(p.getNome() + " HP: " + p.getHp());
+        }
+    }
+}
+
