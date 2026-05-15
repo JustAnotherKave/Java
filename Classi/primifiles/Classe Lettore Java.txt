@@ -1,0 +1,118 @@
+Classe
+
+public class Lettore {
+
+    private int MemTotale;
+    private int PotenzaBatteria;
+    private int Brani;
+    private int BatteriaRimanente;
+    private int OreDiAscoltoTot;
+
+    // COSTRUTTORE 1
+    public Lettore(int MemTotale, int PotenzaBatteria){
+        this.MemTotale = MemTotale;
+        this.PotenzaBatteria = PotenzaBatteria;
+
+        Brani = 0;
+        BatteriaRimanente = PotenzaBatteria;
+        OreDiAscoltoTot = 0;
+    }
+
+    // COSTRUTTORE 2
+    public Lettore(int MemTotale, int PotenzaBatteria, int OreDiAscoltoTot){
+        this.MemTotale = MemTotale;
+        this.PotenzaBatteria = PotenzaBatteria;
+        this.OreDiAscoltoTot = OreDiAscoltoTot;
+
+        Brani = 0;
+        BatteriaRimanente = PotenzaBatteria;
+    }
+
+    // COSTRUTTORE VUOTO
+    public Lettore(){
+        MemTotale = 8;
+        PotenzaBatteria = 10;
+        Brani = 0;
+        BatteriaRimanente = PotenzaBatteria;
+        OreDiAscoltoTot = 0;
+    }
+
+    // GET E SET
+    public int getMemTotale() { return MemTotale; }
+    public void setMemTotale(int memTotale) { MemTotale = memTotale; }
+
+    public int getPotenzaBatteria() { return PotenzaBatteria; }
+    public void setPotenzaBatteria(int potenzaBatteria) { PotenzaBatteria = potenzaBatteria; }
+
+    public int getBrani() { return Brani; }
+    public void setBrani(int brani) { Brani = brani; }
+
+    public int getBatteriaRimanente() { return BatteriaRimanente; }
+    public void setBatteriaRimanente(int batteriaRimanente) { BatteriaRimanente = batteriaRimanente; }
+
+    public int getOreDiAscoltoTot() { return OreDiAscoltoTot; }
+    public void setOreDiAscoltoTot(int oreDiAscoltoTot) { OreDiAscoltoTot = oreDiAscoltoTot; }
+
+    // METODI
+
+    public void caricaBrani(int nBrani){
+        Brani += nBrani;
+        System.out.println("Caricati " + nBrani + " brani. Totale: " + Brani);
+    }
+
+    public void rimuoviBrani(int nBrani){
+        if(nBrani <= 0 || nBrani > Brani){
+            System.out.println("Rimozione non effettuata");
+        } else {
+            Brani -= nBrani;
+            System.out.println("Rimossi " + nBrani + " brani. Totale: " + Brani);
+        }
+    }
+
+    public void ascoltaBrani(int ore){
+        if(ore <= 0){
+            System.out.println("Ore non valide");
+            return;
+        }
+
+        if(ore > BatteriaRimanente){
+            System.out.println("Batteria insufficiente! Ascolto limitato a " + BatteriaRimanente + " ore");
+            OreDiAscoltoTot += BatteriaRimanente;
+            BatteriaRimanente = 0;
+        } else {
+            BatteriaRimanente -= ore;
+            OreDiAscoltoTot += ore;
+        }
+    }
+
+    public void caricaBatteria(){
+        BatteriaRimanente = PotenzaBatteria;
+        System.out.println("Ricarica completata!");
+    }
+
+    public void visualizzaLettore(){
+        System.out.println("Memoria totale (GB): " + MemTotale);
+        System.out.println("Potenza batteria (ore): " + PotenzaBatteria);
+        System.out.println("Numero brani: " + Brani);
+        System.out.println("Batteria rimanente: " + BatteriaRimanente);
+        System.out.println("Ore totali di ascolto: " + OreDiAscoltoTot);
+        System.out.println("-------------------------");
+    }
+}
+
+Main
+
+public class Main {
+    public static void main(String[] args) {
+
+        Lettore l = new Lettore(8, 16);
+
+        l.caricaBrani(30);
+        l.ascoltaBrani(4);
+        l.visualizzaLettore();
+
+        l.rimuoviBrani(8);
+        l.ascoltaBrani(7);
+        l.visualizzaLettore();
+    }
+}
